@@ -11,6 +11,8 @@ interface DragDropPayload {
 
 function App() {
   const [folderPath, setFolderPath] = useState("");
+  const [recursive, setRecursive] = useState(false);
+  const [extensions, setExtensions] = useState<string[]>([]);
 
   useEffect(() => {
     let unlisten: UnlistenFn | undefined;
@@ -44,7 +46,14 @@ function App() {
   return (
     <Layout className="app-shell">
       <Layout.Sider className="app-sidebar" width={360}>
-        <ConfigPanel folderPath={folderPath} onFolderPathChange={setFolderPath} />
+        <ConfigPanel
+          extensions={extensions}
+          folderPath={folderPath}
+          onExtensionsChange={setExtensions}
+          onFolderPathChange={setFolderPath}
+          onRecursiveChange={setRecursive}
+          recursive={recursive}
+        />
       </Layout.Sider>
       <Layout.Content className="app-content">
         <PreviewPanel />
