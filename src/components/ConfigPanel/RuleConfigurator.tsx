@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import {
   closestCenter,
   DndContext,
@@ -26,6 +26,7 @@ interface RuleEntry {
 }
 
 interface RuleConfiguratorProps {
+  rules: RuleConfig[];
   onRulesChange: (rules: RuleConfig[]) => void;
 }
 
@@ -58,9 +59,33 @@ function createDefaultRule(type: RuleType): RuleConfig {
   }
 }
 
-export function RuleConfigurator({ onRulesChange }: RuleConfiguratorProps) {
+function serializeRules(rules: RuleConfig[]) {
+  return JSON.stringify(rules);
+}
+
+function createRuleEntries(
+  rules: RuleConfig[],
+  nextIdRef: MutableRefObject<number>,
+) {
+  return rules.map((rule) => {
+    const entry = {
+      id: `rule-${nextIdRef.current}`,
+      config: rule,
+    };
+
+    nextIdRef.current += 1;
+    return entry;
+  });
+}
+
+export function RuleConfigurator({
+  rules,
+  onRulesChange,
+}: RuleConfiguratorProps) {
   const nextIdRef = useRef(1);
-  const [entries, setEntries] = useState<RuleEntry[]>([]);
+  const [entries, setEntries] = useState<RuleEntry[]>(() =>
+    createRuleEntries(rules, nextIdRef),
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -73,6 +98,14 @@ export function RuleConfigurator({ onRulesChange }: RuleConfiguratorProps) {
     setEntries(nextEntries);
     onRulesChange(nextEntries.map((entry) => entry.config));
   };
+
+  useEffect(() => {
+    const currentRules = entries.map((entry) => entry.config);
+
+    if (serializeRules(currentRules) !== serializeRules(rules)) {
+      setEntries(createRuleEntries(rules, nextIdRef));
+    }
+  }, [rules, entries]);
 
   const handleAddRule = (type: RuleType) => {
     const nextEntry: RuleEntry = {

@@ -108,6 +108,16 @@ body {
   gap: 6px 0;
 }
 
+.template-manager__controls {
+  display: flex;
+  width: 100%;
+}
+
+.template-manager__select {
+  flex: 1;
+  min-width: 0;
+}
+
 .rule-configurator__add {
   min-width: 112px;
 }

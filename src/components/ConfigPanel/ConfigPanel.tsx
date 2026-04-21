@@ -47,8 +47,8 @@ export function ConfigPanel({
           extensions={extensions}
           onExtensionsChange={onExtensionsChange}
         />
-        <RuleConfigurator onRulesChange={onRulesChange} />
-        <TemplateManager />
+        <RuleConfigurator rules={rules} onRulesChange={onRulesChange} />
+        <TemplateManager rules={rules} onLoadRules={onRulesChange} />
       </Space>
 
       <div className="config-panel__footer">
