@@ -1,0 +1,26 @@
+import { Badge, Typography } from "antd";
+
+interface StatsBarProps {
+  totalCount: number;
+  selectedCount: number;
+  conflictCount: number;
+}
+
+export function StatsBar({
+  totalCount,
+  selectedCount,
+  conflictCount,
+}: StatsBarProps) {
+  return (
+    <div className="stats-bar">
+      <Typography.Text>共 {totalCount} 个文件</Typography.Text>
+      <Typography.Text>已选 {selectedCount} 个</Typography.Text>
+      <Typography.Text
+        className={conflictCount > 0 ? "stats-bar__conflict" : undefined}
+      >
+        <Badge color={conflictCount > 0 ? "red" : "green"} />
+        {conflictCount} 个冲突
+      </Typography.Text>
+    </div>
+  );
+}

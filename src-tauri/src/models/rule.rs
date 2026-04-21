@@ -28,6 +28,7 @@ pub enum RuleConfig {
         digits: u8,
         sort_by: SortBy,
     },
+    #[serde(rename = "datetime")]
     DateTime {
         source: DateSource,
         format: String,
@@ -93,4 +94,27 @@ pub struct ExecuteResult {
 pub struct UndoResult {
     pub restored: u32,
     pub failed: u32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{DateSource, RuleConfig};
+
+    #[test]
+    fn rule_config_uses_frontend_datetime_tag() {
+        let json = serde_json::json!({
+            "type": "datetime",
+            "source": "modified",
+            "format": "YYYYMMDD"
+        });
+
+        let rule: RuleConfig = serde_json::from_value(json).unwrap();
+        assert!(matches!(
+            rule,
+            RuleConfig::DateTime {
+                source: DateSource::Modified,
+                ..
+            }
+        ));
+    }
 }

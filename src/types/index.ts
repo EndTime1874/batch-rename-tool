@@ -14,6 +14,8 @@ export interface PreviewItem {
   selected: boolean;
 }
 
+export type PreviewFileType = "all" | "image" | "video" | "audio" | "document";
+
 export type CaseMode = "upper" | "lower" | "capitalize";
 export type SortBy = "name" | "created" | "modified" | "size";
 export type DateSource = "created" | "modified";

@@ -12,8 +12,10 @@ interface ConfigPanelProps {
   rules: RuleConfig[];
   onExtensionsChange: (extensions: string[]) => void;
   onFolderPathChange: (path: string) => void;
+  onGeneratePreview: () => void;
   onRecursiveChange: (recursive: boolean) => void;
   onRulesChange: (rules: RuleConfig[]) => void;
+  previewLoading: boolean;
 }
 
 export function ConfigPanel({
@@ -23,8 +25,10 @@ export function ConfigPanel({
   rules,
   onExtensionsChange,
   onFolderPathChange,
+  onGeneratePreview,
   onRecursiveChange,
   onRulesChange,
+  previewLoading,
 }: ConfigPanelProps) {
   return (
     <aside className="config-panel">
@@ -51,6 +55,8 @@ export function ConfigPanel({
         <Button
           block
           disabled={!folderPath || extensions.length === 0 || rules.length === 0}
+          loading={previewLoading}
+          onClick={onGeneratePreview}
           type="primary"
         >
           生成预览

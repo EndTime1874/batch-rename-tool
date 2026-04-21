@@ -4,6 +4,7 @@ import { listen, TauriEvent } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { ConfigPanel } from "./components/ConfigPanel/ConfigPanel";
 import { PreviewPanel } from "./components/PreviewPanel/PreviewPanel";
+import { useRenamePreview } from "./hooks/useRenamePreview";
 import type { RuleConfig } from "./types";
 
 interface DragDropPayload {
@@ -15,6 +16,7 @@ function App() {
   const [recursive, setRecursive] = useState(false);
   const [extensions, setExtensions] = useState<string[]>([]);
   const [rules, setRules] = useState<RuleConfig[]>([]);
+  const preview = useRenamePreview();
 
   useEffect(() => {
     let unlisten: UnlistenFn | undefined;
@@ -53,14 +55,29 @@ function App() {
           folderPath={folderPath}
           onExtensionsChange={setExtensions}
           onFolderPathChange={setFolderPath}
+          onGeneratePreview={() =>
+            preview.generatePreview(folderPath, recursive, extensions, rules)
+          }
           onRecursiveChange={setRecursive}
           onRulesChange={setRules}
+          previewLoading={preview.loading}
           recursive={recursive}
           rules={rules}
         />
       </Layout.Sider>
       <Layout.Content className="app-content">
-        <PreviewPanel />
+        <PreviewPanel
+          conflictCount={preview.conflictCount}
+          filterType={preview.filterType}
+          items={preview.filteredItems}
+          loading={preview.loading}
+          onFilterByType={preview.filterByType}
+          onInvertSelect={preview.invertSelect}
+          onToggleSelect={preview.toggleSelect}
+          onToggleSelectAll={preview.toggleSelectAll}
+          selectedCount={preview.selectedCount}
+          totalCount={preview.totalCount}
+        />
       </Layout.Content>
     </Layout>
   );
