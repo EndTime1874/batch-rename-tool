@@ -109,10 +109,32 @@ CARGO_TARGET_DIR=/tmp/batchrename-tauri-target npm run tauri:build:mac
 
 ## Windows 打包
 
-在 Windows 环境中执行：
+Windows 支持两种发行版本：
+
+### 便携版（绿色版）
+
+数据保存在 EXE 同级 `config/` 目录，可复制到 U 盘随身携带：
 
 ```bash
-npm run tauri:build:windows
+npm run build:win:portable
+```
+
+产物位置：
+
+```text
+dist-portable/
+├── BatchRename.exe
+├── portable.flag      # 便携版标识文件
+├── config/            # 数据存储目录（模板、备份、日志）
+└── README.txt
+```
+
+### 安装版（NSIS 安装包）
+
+数据保存在系统标准目录（`C:\Users\xxx\AppData\Roaming\BatchRename\`）：
+
+```bash
+npm run build:win:installer
 ```
 
 产物位置：
@@ -121,7 +143,23 @@ npm run tauri:build:windows
 src-tauri/target/release/bundle/nsis/
 ```
 
-当前 Windows 配置使用 NSIS 安装包，默认安装到 Program Files，并通过 NSIS hook 创建桌面快捷方式。
+安装包默认安装到 Program Files，并通过 NSIS hook 创建桌面快捷方式。
+
+### 运行模式识别
+
+程序启动时自动检测 `portable.flag` 文件：
+- 存在：便携版模式，数据保存在软件目录
+- 不存在：安装版模式，数据保存在系统目录
+
+界面左下角会显示当前运行模式。
+
+### 传统构建方式
+
+也可以使用传统命令（仅生成 NSIS 安装包）：
+
+```bash
+npm run tauri:build:windows
+```
 
 ## 通用 Tauri 打包
 
