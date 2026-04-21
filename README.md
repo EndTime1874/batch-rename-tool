@@ -1,9 +1,150 @@
-# Tauri + React + Typescript
+# BatchRename
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+基于 Tauri + React + Rust 的桌面批量重命名工具。
 
-## Recommended IDE Setup
+## 环境要求
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- Node.js 20+ 或当前 LTS
+- npm
+- Rust stable
+- Tauri 桌面构建依赖
+- macOS：Xcode Command Line Tools
+- Windows：Visual Studio Build Tools，勾选 MSVC C++ 工具链和 Windows SDK
 
-# batch-rename-tool
+## 安装依赖
+
+```bash
+npm install
+```
+
+如果是第一次在本机开发 Tauri，先确认 Rust 工具链可用：
+
+```bash
+rustup update
+cargo --version
+```
+
+## 本地开发
+
+启动 Tauri 开发模式：
+
+```bash
+npm run tauri dev
+```
+
+只启动前端 Vite：
+
+```bash
+npm run dev
+```
+
+## 构建前端
+
+```bash
+npm run build
+```
+
+## 运行测试
+
+Rust 核心逻辑测试：
+
+```bash
+cd src-tauri
+cargo test
+```
+
+格式检查：
+
+```bash
+cd src-tauri
+cargo fmt --check
+```
+
+## 生成应用图标
+
+图标源文件：
+
+```text
+src-tauri/app-icon.png
+```
+
+重新生成所有平台图标：
+
+```bash
+npm run tauri icon src-tauri/app-icon.png
+```
+
+生成结果会写入：
+
+```text
+src-tauri/icons/
+```
+
+## macOS 打包
+
+生成 DMG：
+
+```bash
+npm run tauri:build:mac
+```
+
+产物位置：
+
+```text
+src-tauri/target/release/bundle/dmg/
+```
+
+生成 Universal Binary 需要先安装 Intel target：
+
+```bash
+rustup target add x86_64-apple-darwin
+npm run tauri:build:mac:universal
+```
+
+如果 `hdiutil` 在项目目录下创建 DMG 失败，可以临时把构建目录放到 `/tmp`：
+
+```bash
+CARGO_TARGET_DIR=/tmp/batchrename-tauri-target npm run tauri:build:mac
+```
+
+## Windows 打包
+
+在 Windows 环境中执行：
+
+```bash
+npm run tauri:build:windows
+```
+
+产物位置：
+
+```text
+src-tauri/target/release/bundle/nsis/
+```
+
+当前 Windows 配置使用 NSIS 安装包，默认安装到 Program Files，并通过 NSIS hook 创建桌面快捷方式。
+
+## 通用 Tauri 打包
+
+也可以直接运行 Tauri CLI：
+
+```bash
+npm run tauri build
+```
+
+Tauri 会自动合并平台配置：
+
+- macOS：`src-tauri/tauri.macos.conf.json`
+- Windows：`src-tauri/tauri.windows.conf.json`
+
+## 发布前检查
+
+```bash
+npm run build
+cd src-tauri && cargo test && cargo fmt --check
+```
+
+确认 Git 工作区只包含预期改动：
+
+```bash
+git status --short
+```
