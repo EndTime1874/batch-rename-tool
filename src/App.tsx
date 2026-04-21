@@ -76,6 +76,7 @@ function App() {
           onToggleSelect={preview.toggleSelect}
           onToggleSelectAll={preview.toggleSelectAll}
           selectedCount={preview.selectedCount}
+          selectedItems={preview.selectedItems}
           totalCount={preview.totalCount}
         />
       </Layout.Content>

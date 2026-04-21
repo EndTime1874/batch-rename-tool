@@ -280,3 +280,71 @@ body {
 .preview-card__conflict {
   margin-inline-end: 0;
 }
+
+.result-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.result-panel .ant-result {
+  padding: 24px 16px 10px;
+}
+
+.result-panel__stats {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  justify-content: center;
+}
+
+.result-panel__success {
+  color: #389e0d;
+}
+
+.result-panel__failed {
+  color: #cf1322;
+}
+
+.result-panel__rolled-back {
+  color: #d46b08;
+}
+
+.result-panel__collapse {
+  margin: 0 auto;
+  max-width: 760px;
+  width: 100%;
+}
+
+.result-panel__failures {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-panel__failure {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-panel__path {
+  word-break: break-all;
+}
+
+.result-panel__undo {
+  align-items: center;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 760px;
+  padding: 12px 16px;
+  width: 100%;
+}

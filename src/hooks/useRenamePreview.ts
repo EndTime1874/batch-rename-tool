@@ -141,6 +141,10 @@ export function useRenamePreview() {
   const totalCount = previewItems.length;
   const selectedCount = previewItems.filter((item) => item.selected).length;
   const conflictCount = previewItems.filter((item) => item.conflict).length;
+  const selectedItems = useMemo(
+    () => previewItems.filter((item) => item.selected && !item.conflict),
+    [previewItems],
+  );
 
   return {
     conflictCount,
@@ -152,6 +156,7 @@ export function useRenamePreview() {
     loading,
     previewItems,
     selectedCount,
+    selectedItems,
     toggleSelect,
     toggleSelectAll,
     totalCount,
