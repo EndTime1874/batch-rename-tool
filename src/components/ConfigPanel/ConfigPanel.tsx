@@ -3,23 +3,28 @@ import { FileTypeFilter } from "./FileTypeFilter";
 import { FolderSelector } from "./FolderSelector";
 import { RuleConfigurator } from "./RuleConfigurator";
 import { TemplateManager } from "./TemplateManager";
+import type { RuleConfig } from "../../types";
 
 interface ConfigPanelProps {
   extensions: string[];
   folderPath: string;
   recursive: boolean;
+  rules: RuleConfig[];
   onExtensionsChange: (extensions: string[]) => void;
   onFolderPathChange: (path: string) => void;
   onRecursiveChange: (recursive: boolean) => void;
+  onRulesChange: (rules: RuleConfig[]) => void;
 }
 
 export function ConfigPanel({
   extensions,
   folderPath,
   recursive,
+  rules,
   onExtensionsChange,
   onFolderPathChange,
   onRecursiveChange,
+  onRulesChange,
 }: ConfigPanelProps) {
   return (
     <aside className="config-panel">
@@ -38,12 +43,16 @@ export function ConfigPanel({
           extensions={extensions}
           onExtensionsChange={onExtensionsChange}
         />
-        <RuleConfigurator />
+        <RuleConfigurator onRulesChange={onRulesChange} />
         <TemplateManager />
       </Space>
 
       <div className="config-panel__footer">
-        <Button block disabled={!folderPath || extensions.length === 0} type="primary">
+        <Button
+          block
+          disabled={!folderPath || extensions.length === 0 || rules.length === 0}
+          type="primary"
+        >
           生成预览
         </Button>
       </div>

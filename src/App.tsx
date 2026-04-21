@@ -4,6 +4,7 @@ import { listen, TauriEvent } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { ConfigPanel } from "./components/ConfigPanel/ConfigPanel";
 import { PreviewPanel } from "./components/PreviewPanel/PreviewPanel";
+import type { RuleConfig } from "./types";
 
 interface DragDropPayload {
   paths: string[];
@@ -13,6 +14,7 @@ function App() {
   const [folderPath, setFolderPath] = useState("");
   const [recursive, setRecursive] = useState(false);
   const [extensions, setExtensions] = useState<string[]>([]);
+  const [rules, setRules] = useState<RuleConfig[]>([]);
 
   useEffect(() => {
     let unlisten: UnlistenFn | undefined;
@@ -52,7 +54,9 @@ function App() {
           onExtensionsChange={setExtensions}
           onFolderPathChange={setFolderPath}
           onRecursiveChange={setRecursive}
+          onRulesChange={setRules}
           recursive={recursive}
+          rules={rules}
         />
       </Layout.Sider>
       <Layout.Content className="app-content">
