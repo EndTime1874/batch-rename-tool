@@ -62,29 +62,57 @@ cargo fmt --check
 
 ## macOS 打包
 
-生成 DMG：
+### 标准 DMG（当前架构）
+
+生成当前系统架构的 DMG：
 
 ```bash
-npm run tauri:build:mac
+npm run build:mac
 ```
 
 产物位置：
 
 ```text
-src-tauri/target/release/bundle/dmg/
+build/BatchRename_1.0.0_aarch64.dmg  # Apple Silicon
+或
+build/BatchRename_1.0.0_x64.dmg      # Intel
 ```
 
-生成 Universal Binary 需要先安装 Intel target：
+### Universal Binary DMG（通用二进制）
+
+生成同时支持 Apple Silicon 和 Intel 的通用版本：
+
+```bash
+npm run build:mac:universal
+```
+
+需要先安装 Intel target：
 
 ```bash
 rustup target add x86_64-apple-darwin
+```
+
+产物位置：
+
+```text
+build/BatchRename_1.0.0_universal.dmg
+```
+
+### 传统构建方式
+
+也可以使用传统命令（产物在 `src-tauri/target/release/bundle/dmg/`）：
+
+```bash
+npm run tauri:build:mac
 npm run tauri:build:mac:universal
 ```
+
+### 已知问题
 
 如果 `hdiutil` 在项目目录下创建 DMG 失败，可以临时把构建目录放到 `/tmp`：
 
 ```bash
-CARGO_TARGET_DIR=/tmp/batchrename-tauri-target npm run tauri:build:mac
+CARGO_TARGET_DIR=/tmp/batchrename-tauri-target npm run build:mac
 ```
 
 ## Windows 打包

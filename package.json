@@ -11,6 +11,8 @@
     "tauri:build:mac": "tauri build --bundles dmg",
     "tauri:build:mac:universal": "tauri build --target universal-apple-darwin --bundles dmg",
     "tauri:build:windows": "tauri build --bundles nsis",
+    "build:mac": "node scripts/build-macos.js dmg",
+    "build:mac:universal": "node scripts/build-macos.js universal",
     "build:win:portable": "node scripts/build-windows.js portable",
     "build:win:installer": "node scripts/build-windows.js installer"
   },
