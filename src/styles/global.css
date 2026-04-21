@@ -12,19 +12,13 @@ body {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .app-sidebar {
   background: #fafafa;
   border-right: 1px solid #f0f0f0;
-  padding: 20px;
-}
-
-.app-sidebar__placeholder {
-  color: #595959;
-  font-size: 14px;
-  font-weight: 500;
+  min-width: 360px;
 }
 
 .app-content {
@@ -33,4 +27,69 @@ body {
   display: flex;
   justify-content: center;
   padding: 32px;
+}
+
+.config-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.config-panel__header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 20px 20px 14px;
+}
+
+.config-panel__header .ant-typography {
+  margin: 0;
+}
+
+.config-panel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  width: 100%;
+}
+
+.config-panel__footer {
+  border-top: 1px solid #f0f0f0;
+  padding: 16px 20px 20px;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.config-section__heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  min-height: 24px;
+}
+
+.config-section__title {
+  color: #262626;
+  font-weight: 600;
+}
+
+.config-section__placeholder {
+  align-items: center;
+  background: #ffffff;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  color: #8c8c8c;
+  display: flex;
+  min-height: 40px;
+  padding: 8px 10px;
+}
+
+.preview-panel {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
 }
