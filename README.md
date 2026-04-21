@@ -1,6 +1,22 @@
 # BatchRename
 
-基于 Tauri + React + Rust 的桌面批量重命名工具。
+BatchRename 是一个基于 Tauri 2 + React + Rust 的桌面批量重命名工具。
+
+前端负责界面、规则配置和预览展示；Rust 后端负责文件扫描、规则应用、冲突检测、备份、重命名执行和撤销。
+
+## 快速开始
+
+```bash
+npm install
+npm run tauri dev
+```
+
+如果这是第一次在本机开发 Tauri 项目，先确认 Rust 工具链可用：
+
+```bash
+rustup update
+cargo --version
+```
 
 ## 环境要求
 
@@ -9,87 +25,52 @@
 - Rust stable
 - Tauri 桌面构建依赖
 - macOS：Xcode Command Line Tools
-- Windows：Visual Studio Build Tools，勾选 MSVC C++ 工具链和 Windows SDK
+- Windows：Visual Studio Build Tools，需要安装 MSVC C++ 工具链和 Windows SDK
 
-## 安装依赖
+## 常用命令
 
-```bash
-npm install
-```
+| 命令 | 用途 |
+| --- | --- |
+| `npm run dev` | 只启动 Vite 前端开发服务器 |
+| `npm run tauri dev` | 启动完整 Tauri 开发模式 |
+| `npm run build` | TypeScript 检查并构建前端资源 |
+| `cd src-tauri && cargo test` | 运行 Rust 单元测试 |
+| `cd src-tauri && cargo fmt --check` | 检查 Rust 格式 |
 
-如果是第一次在本机开发 Tauri，先确认 Rust 工具链可用：
+## 推荐打包命令
 
-```bash
-rustup update
-cargo --version
-```
+这些命令会把最终发行产物复制到项目根目录的 `build/`。`build/` 是生成目录，不需要提交到 Git。
 
-## 本地开发
+### macOS DMG
 
-启动 Tauri 开发模式：
-
-```bash
-npm run tauri dev
-```
-
-只启动前端 Vite：
-
-```bash
-npm run dev
-```
-
-## 构建前端
-
-```bash
-npm run build
-```
-
-## 运行测试
-
-Rust 核心逻辑测试：
-
-```bash
-cd src-tauri
-cargo test
-```
-
-格式检查：
-
-```bash
-cd src-tauri
-cargo fmt --check
-```
-
-## macOS 打包
-
-### 标准 DMG（当前架构）
-
-生成当前系统架构的 DMG：
+生成当前机器架构的 DMG：
 
 ```bash
 npm run build:mac
 ```
 
-产物位置：
+产物示例：
 
 ```text
 build/BatchRename_1.0.0_aarch64.dmg  # Apple Silicon
-或
 build/BatchRename_1.0.0_x64.dmg      # Intel
 ```
 
-### Universal Binary DMG（通用二进制）
+`build:mac` 的流程是：
 
-生成同时支持 Apple Silicon 和 Intel 的通用版本：
+1. 让 Tauri 只生成 `.app`。
+2. 脚本在系统临时目录里创建 DMG。
+3. 把 DMG 复制到 `build/`。
 
-```bash
-npm run build:mac:universal
-```
+这个命令不会调用 Tauri 默认的 `bundle_dmg.sh`，因此正常情况下不会弹出 Finder 安装窗口。
 
-需要先安装 Intel target：
+### macOS Universal DMG
+
+生成同时支持 Apple Silicon 和 Intel 的通用 DMG：
 
 ```bash
 rustup target add x86_64-apple-darwin
+npm run build:mac:universal
 ```
 
 产物位置：
@@ -98,90 +79,84 @@ rustup target add x86_64-apple-darwin
 build/BatchRename_1.0.0_universal.dmg
 ```
 
-### 传统构建方式
+### Windows 便携版
 
-也可以使用传统命令（产物在 `src-tauri/target/release/bundle/dmg/`）：
-
-```bash
-npm run tauri:build:mac
-npm run tauri:build:mac:universal
-```
-
-### 已知问题
-
-如果 `hdiutil` 在项目目录下创建 DMG 失败，可以临时把构建目录放到 `/tmp`：
-
-```bash
-CARGO_TARGET_DIR=/tmp/batchrename-tauri-target npm run build:mac
-```
-
-## Windows 打包
-
-Windows 支持两种发行版本：
-
-### 便携版（绿色版）
-
-数据保存在 EXE 同级 `config/` 目录，可复制到 U 盘随身携带：
+生成绿色版目录，数据会保存在程序同级的 `config/` 目录：
 
 ```bash
 npm run build:win:portable
 ```
 
-产物位置：
+产物结构：
 
 ```text
 build/BatchRename-Portable/
 ├── BatchRename.exe
-├── portable.flag      # 便携版标识文件
-├── config/            # 数据存储目录（模板、备份、日志）
+├── portable.flag
+├── config/
 └── README.txt
 ```
 
-### 安装版（NSIS 安装包）
+### Windows 安装版
 
-数据保存在系统标准目录（`C:\Users\xxx\AppData\Roaming\BatchRename\`）：
+生成 NSIS 安装包：
 
 ```bash
 npm run build:win:installer
 ```
 
-产物位置：
+产物示例：
 
 ```text
 build/batch-rename_1.0.0_x64-setup.exe
 ```
 
-安装包默认安装到 Program Files，并通过 NSIS hook 创建桌面快捷方式。
+安装版默认安装到 Program Files，应用数据保存在：
 
-### 运行模式识别
-
-程序启动时自动检测 `portable.flag` 文件：
-
-- 存在：便携版模式，数据保存在软件目录
-- 不存在：安装版模式，数据保存在系统目录
-
-界面左下角会显示当前运行模式。
-
-### 传统构建方式
-
-也可以使用传统命令（仅生成 NSIS 安装包到 `src-tauri/target/release/bundle/nsis/`）：
-
-```bash
-npm run tauri:build:windows
+```text
+C:\Users\<用户名>\AppData\Roaming\BatchRename\
 ```
 
-## 通用 Tauri 打包
+## 底层 Tauri 打包命令
 
-也可以直接运行 Tauri CLI：
+下面这些命令主要用于排查 Tauri 原生打包流程，不是日常发布推荐命令。
 
-```bash
-npm run tauri build
+| 命令 | 产物位置 | 说明 |
+| --- | --- | --- |
+| `npm run tauri:build:mac` | `src-tauri/target/release/bundle/dmg/` | Tauri 默认 DMG 流程，可能弹出 Finder 安装窗口 |
+| `npm run tauri:build:mac:universal` | `src-tauri/target/universal-apple-darwin/release/bundle/dmg/` | Tauri 默认 Universal DMG 流程 |
+| `npm run tauri:build:windows` | `src-tauri/target/release/bundle/nsis/` | Tauri 默认 NSIS 安装包 |
+| `npm run tauri build` | `src-tauri/target/release/bundle/` | 按平台配置执行默认打包 |
+
+如果只是想拿到发布给用户的安装包，请优先使用 `npm run build:mac`、`npm run build:mac:universal`、`npm run build:win:portable` 或 `npm run build:win:installer`。
+
+## 项目结构
+
+```text
+src/
+├── components/        # React UI 组件
+├── hooks/             # 前端业务 hooks
+├── types/             # TypeScript 类型
+├── utils/             # 前端工具函数和 Tauri IPC 封装
+└── styles/            # 全局样式
+
+src-tauri/src/
+├── commands/          # Tauri commands，供前端调用
+├── core/              # 扫描、规则、冲突检测、备份、重命名核心逻辑
+├── models/            # Rust 数据模型
+└── utils/             # Rust 工具函数
+
+scripts/
+├── build-macos.js     # macOS 推荐打包脚本，最终输出到 build/
+└── build-windows.js   # Windows 推荐打包脚本，最终输出到 build/
 ```
 
-Tauri 会自动合并平台配置：
+## 平台配置
 
-- macOS：`src-tauri/tauri.macos.conf.json`
-- Windows：`src-tauri/tauri.windows.conf.json`
+- 通用配置：`src-tauri/tauri.conf.json`
+- macOS 配置：`src-tauri/tauri.macos.conf.json`
+- Windows 配置：`src-tauri/tauri.windows.conf.json`
+- Tauri capabilities：`src-tauri/capabilities/default.json`
 
 ## 发布前检查
 
@@ -190,8 +165,44 @@ npm run build
 cd src-tauri && cargo test && cargo fmt --check
 ```
 
-确认 Git 工作区只包含预期改动：
+确认工作区只包含预期改动：
 
 ```bash
 git status --short
 ```
+
+## 常见问题
+
+### 运行 `npm run build:mac` 后，安装包在哪里？
+
+在项目根目录的 `build/`：
+
+```text
+build/BatchRename_1.0.0_aarch64.dmg
+```
+
+### 为什么我打包时弹出了 Finder 安装窗口？
+
+通常是因为运行了底层命令 `npm run tauri:build:mac`，它会使用 Tauri 默认的 DMG 脚本，并在制作 DMG 时调用 Finder 做窗口布局。
+
+日常发布请运行：
+
+```bash
+npm run build:mac
+```
+
+### `hdiutil` 报错怎么办？
+
+DMG 创建依赖 macOS 的 `hdiutil`，请在普通 Terminal 里运行打包命令，不要在受限沙箱或没有磁盘镜像权限的环境里运行。
+
+如果仍然失败，可以先确认 Xcode Command Line Tools 已安装：
+
+```bash
+xcode-select --install
+```
+
+### Windows 便携版和安装版有什么区别？
+
+便携版目录里有 `portable.flag`，程序会把模板、备份和日志保存在同级 `config/` 目录。
+
+安装版没有 `portable.flag`，程序会把数据保存在系统用户数据目录。
