@@ -21,10 +21,17 @@ try {
   process.exit(1);
 }
 
+const buildDir = path.join(__dirname, '../build');
+
+// 确保 build 目录存在
+if (!fs.existsSync(buildDir)) {
+  fs.mkdirSync(buildDir, { recursive: true });
+}
+
 if (mode === 'portable') {
   // 便携版：取出 EXE，创建便携包文件夹
   const rawExe = path.join(__dirname, '../src-tauri/target/release/batch-rename.exe');
-  const portableDir = path.join(__dirname, '../dist-portable');
+  const portableDir = path.join(buildDir, 'BatchRename-Portable');
 
   if (!fs.existsSync(rawExe)) {
     console.error(`错误：找不到可执行文件 ${rawExe}`);
@@ -62,14 +69,31 @@ if (mode === 'portable') {
   console.log('   portable.flag');
   console.log('   config/         ← 数据保存位置');
   console.log('   README.txt');
+  console.log(`\n📦 发行包位置：${portableDir}`);
 } else {
-  // 安装版：直接指向 NSIS 生成的安装包
+  // 安装版：复制 NSIS 安装包到 build 目录
   const nsisDir = path.join(distDir, 'nsis');
-  if (fs.existsSync(nsisDir)) {
-    console.log(`\n✅ 安装包构建完成：${nsisDir}`);
-    console.log('   安装版数据保存在：C:\\Users\\xxx\\AppData\\Roaming\\BatchRename\\');
-  } else {
+  if (!fs.existsSync(nsisDir)) {
     console.error(`错误：找不到 NSIS 安装包目录 ${nsisDir}`);
     process.exit(1);
   }
+
+  // 查找安装包文件
+  const files = fs.readdirSync(nsisDir);
+  const installerFile = files.find(f => f.endsWith('.exe'));
+
+  if (!installerFile) {
+    console.error(`错误：在 ${nsisDir} 中找不到 .exe 安装包`);
+    process.exit(1);
+  }
+
+  const srcInstaller = path.join(nsisDir, installerFile);
+  const destInstaller = path.join(buildDir, installerFile);
+
+  // 复制安装包到 build 目录
+  fs.copyFileSync(srcInstaller, destInstaller);
+
+  console.log(`\n✅ 安装包构建完成`);
+  console.log('   安装版数据保存在：C:\\Users\\xxx\\AppData\\Roaming\\BatchRename\\');
+  console.log(`\n📦 发行包位置：${destInstaller}`);
 }

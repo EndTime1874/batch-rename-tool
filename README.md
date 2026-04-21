@@ -60,26 +60,6 @@ cd src-tauri
 cargo fmt --check
 ```
 
-## 生成应用图标
-
-图标源文件：
-
-```text
-src-tauri/app-icon.png
-```
-
-重新生成所有平台图标：
-
-```bash
-npm run tauri icon src-tauri/app-icon.png
-```
-
-生成结果会写入：
-
-```text
-src-tauri/icons/
-```
-
 ## macOS 打包
 
 生成 DMG：
@@ -122,7 +102,7 @@ npm run build:win:portable
 产物位置：
 
 ```text
-dist-portable/
+build/BatchRename-Portable/
 ├── BatchRename.exe
 ├── portable.flag      # 便携版标识文件
 ├── config/            # 数据存储目录（模板、备份、日志）
@@ -140,7 +120,7 @@ npm run build:win:installer
 产物位置：
 
 ```text
-src-tauri/target/release/bundle/nsis/
+build/batch-rename_1.0.0_x64-setup.exe
 ```
 
 安装包默认安装到 Program Files，并通过 NSIS hook 创建桌面快捷方式。
@@ -148,6 +128,7 @@ src-tauri/target/release/bundle/nsis/
 ### 运行模式识别
 
 程序启动时自动检测 `portable.flag` 文件：
+
 - 存在：便携版模式，数据保存在软件目录
 - 不存在：安装版模式，数据保存在系统目录
 
@@ -155,7 +136,7 @@ src-tauri/target/release/bundle/nsis/
 
 ### 传统构建方式
 
-也可以使用传统命令（仅生成 NSIS 安装包）：
+也可以使用传统命令（仅生成 NSIS 安装包到 `src-tauri/target/release/bundle/nsis/`）：
 
 ```bash
 npm run tauri:build:windows
