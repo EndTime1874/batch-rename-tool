@@ -10,7 +10,9 @@
     "tauri": "tauri",
     "tauri:build:mac": "tauri build --bundles dmg",
     "tauri:build:mac:universal": "tauri build --target universal-apple-darwin --bundles dmg",
-    "tauri:build:windows": "tauri build --bundles nsis"
+    "tauri:build:windows": "tauri build --bundles nsis",
+    "build:win:portable": "node scripts/build-windows.js portable",
+    "build:win:installer": "node scripts/build-windows.js installer"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

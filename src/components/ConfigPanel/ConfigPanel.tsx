@@ -1,4 +1,5 @@
-import { Button, Space, Typography } from "antd";
+import { Button, Space, Tag, Typography } from "antd";
+import { CloudOutlined, UsbOutlined } from "@ant-design/icons";
 import { FileTypeFilter } from "./FileTypeFilter";
 import { FolderSelector } from "./FolderSelector";
 import { RuleConfigurator } from "./RuleConfigurator";
@@ -6,6 +7,7 @@ import { TemplateManager } from "./TemplateManager";
 import type { RuleConfig } from "../../types";
 
 interface ConfigPanelProps {
+  appMode: "portable" | "installed" | null;
   extensions: string[];
   folderPath: string;
   recursive: boolean;
@@ -19,6 +21,7 @@ interface ConfigPanelProps {
 }
 
 export function ConfigPanel({
+  appMode,
   extensions,
   folderPath,
   recursive,
@@ -50,6 +53,20 @@ export function ConfigPanel({
         <RuleConfigurator rules={rules} onRulesChange={onRulesChange} />
         <TemplateManager rules={rules} onLoadRules={onRulesChange} />
       </Space>
+
+      {appMode && (
+        <div style={{ padding: "12px 16px" }}>
+          {appMode === "portable" ? (
+            <Tag color="orange" icon={<UsbOutlined />}>
+              便携版 · 数据保存在软件目录
+            </Tag>
+          ) : (
+            <Tag color="blue" icon={<CloudOutlined />}>
+              安装版 · 数据保存在系统目录
+            </Tag>
+          )}
+        </div>
+      )}
 
       <div className="config-panel__footer">
         <Button

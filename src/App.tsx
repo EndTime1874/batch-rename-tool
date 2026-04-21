@@ -5,6 +5,7 @@ import type { UnlistenFn } from "@tauri-apps/api/event";
 import { ConfigPanel } from "./components/ConfigPanel/ConfigPanel";
 import { PreviewPanel } from "./components/PreviewPanel/PreviewPanel";
 import { useRenamePreview } from "./hooks/useRenamePreview";
+import { invokeCommand } from "./utils/tauriInvoke";
 import type { RuleConfig } from "./types";
 
 interface DragDropPayload {
@@ -16,6 +17,7 @@ function App() {
   const [recursive, setRecursive] = useState(false);
   const [extensions, setExtensions] = useState<string[]>([]);
   const [rules, setRules] = useState<RuleConfig[]>([]);
+  const [appMode, setAppMode] = useState<"portable" | "installed" | null>(null);
   const preview = useRenamePreview();
 
   useEffect(() => {
@@ -47,10 +49,21 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    invokeCommand<string>("get_app_mode")
+      .then((mode) => {
+        setAppMode(mode as "portable" | "installed");
+      })
+      .catch((error: unknown) => {
+        console.error("Failed to get app mode", error);
+      });
+  }, []);
+
   return (
     <Layout className="app-shell">
       <Layout.Sider className="app-sidebar" width={360}>
         <ConfigPanel
+          appMode={appMode}
           extensions={extensions}
           folderPath={folderPath}
           onExtensionsChange={setExtensions}
