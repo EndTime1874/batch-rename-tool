@@ -78,6 +78,7 @@ function App() {
           selectedCount={preview.selectedCount}
           selectedItems={preview.selectedItems}
           totalCount={preview.totalCount}
+          warningCount={preview.warningCount}
         />
       </Layout.Content>
     </Layout>

@@ -64,6 +64,7 @@ pub struct PreviewItem {
     pub original: FileItem,
     pub new_name: String,
     pub conflict: bool,
+    pub warning: Option<String>,
     pub selected: bool,
 }
 
@@ -98,17 +99,19 @@ pub struct UndoResult {
 
 #[cfg(test)]
 mod tests {
+    use std::error::Error;
+
     use super::{DateSource, RuleConfig};
 
     #[test]
-    fn rule_config_uses_frontend_datetime_tag() {
+    fn rule_config_uses_frontend_datetime_tag() -> Result<(), Box<dyn Error>> {
         let json = serde_json::json!({
             "type": "datetime",
             "source": "modified",
             "format": "YYYYMMDD"
         });
 
-        let rule: RuleConfig = serde_json::from_value(json).unwrap();
+        let rule: RuleConfig = serde_json::from_value(json)?;
         assert!(matches!(
             rule,
             RuleConfig::DateTime {
@@ -116,5 +119,6 @@ mod tests {
                 ..
             }
         ));
+        Ok(())
     }
 }

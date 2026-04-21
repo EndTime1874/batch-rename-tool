@@ -146,6 +146,7 @@ mod tests {
             },
             new_name: String::from("renamed.txt"),
             conflict: false,
+            warning: None,
             selected: true,
         }
     }

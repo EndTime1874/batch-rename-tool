@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { message } from "antd";
-import { invoke } from "@tauri-apps/api/core";
+import { invokeCommand } from "../utils/tauriInvoke";
 import type { ExecuteResult, PreviewItem, UndoResult } from "../types";
 
 export function useRenameExecute() {
@@ -14,13 +14,12 @@ export function useRenameExecute() {
     setUndoResult(null);
 
     try {
-      const executeResult = await invoke<ExecuteResult>("execute_rename", {
+      const executeResult = await invokeCommand<ExecuteResult>("execute_rename", {
         items,
       });
       setResult(executeResult);
       return executeResult;
-    } catch (error) {
-      message.error(String(error));
+    } catch {
       return undefined;
     } finally {
       setExecuting(false);
@@ -31,7 +30,7 @@ export function useRenameExecute() {
     setUndoing(true);
 
     try {
-      const nextUndoResult = await invoke<UndoResult>("undo_last");
+      const nextUndoResult = await invokeCommand<UndoResult>("undo_last");
       setUndoResult(nextUndoResult);
 
       if (nextUndoResult.restored === 0 && nextUndoResult.failed === 0) {
@@ -39,8 +38,7 @@ export function useRenameExecute() {
       }
 
       return nextUndoResult;
-    } catch (error) {
-      message.error(String(error));
+    } catch {
       return undefined;
     } finally {
       setUndoing(false);

@@ -230,6 +230,10 @@ body {
   color: #cf1322;
 }
 
+.stats-bar__warning {
+  color: #d46b08;
+}
+
 .preview-list {
   display: flex;
   flex: 1;
@@ -272,6 +276,11 @@ body {
   background: #fff7e6;
 }
 
+.preview-card--warning {
+  border-color: #ffd666;
+  background: #fffbe6;
+}
+
 .preview-card__type {
   margin-inline-end: 0;
   text-align: center;
@@ -289,6 +298,12 @@ body {
 
 .preview-card__conflict {
   margin-inline-end: 0;
+}
+
+.preview-card__badges {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
 }
 
 .result-panel {

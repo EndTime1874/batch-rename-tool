@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { message } from "antd";
-import { invoke } from "@tauri-apps/api/core";
+import { invokeCommand } from "../utils/tauriInvoke";
 import type { RuleConfig, Template } from "../types";
 
 export function useTemplates() {
@@ -11,10 +11,10 @@ export function useTemplates() {
     setLoading(true);
 
     try {
-      const nextTemplates = await invoke<Template[]>("list_templates");
+      const nextTemplates = await invokeCommand<Template[]>("list_templates");
       setTemplates(nextTemplates);
-    } catch (error) {
-      message.error(String(error));
+    } catch {
+      setTemplates([]);
     } finally {
       setLoading(false);
     }
@@ -27,12 +27,11 @@ export function useTemplates() {
   const saveTemplate = useCallback(
     async (name: string, rules: RuleConfig[]) => {
       try {
-        await invoke("save_template", { name, rules });
+        await invokeCommand<void>("save_template", { name, rules });
         message.success("模板已保存");
         await refreshTemplates();
         return true;
-      } catch (error) {
-        message.error(String(error));
+      } catch {
         return false;
       }
     },
@@ -41,9 +40,8 @@ export function useTemplates() {
 
   const loadTemplate = useCallback(async (name: string) => {
     try {
-      return await invoke<RuleConfig[]>("load_template", { name });
-    } catch (error) {
-      message.error(String(error));
+      return await invokeCommand<RuleConfig[]>("load_template", { name });
+    } catch {
       return null;
     }
   }, []);
@@ -51,12 +49,11 @@ export function useTemplates() {
   const deleteTemplate = useCallback(
     async (name: string) => {
       try {
-        await invoke("delete_template", { name });
+        await invokeCommand<void>("delete_template", { name });
         message.success("模板已删除");
         await refreshTemplates();
         return true;
-      } catch (error) {
-        message.error(String(error));
+      } catch {
         return false;
       }
     },

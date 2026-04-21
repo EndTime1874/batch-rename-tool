@@ -4,12 +4,14 @@ interface StatsBarProps {
   totalCount: number;
   selectedCount: number;
   conflictCount: number;
+  warningCount: number;
 }
 
 export function StatsBar({
   totalCount,
   selectedCount,
   conflictCount,
+  warningCount,
 }: StatsBarProps) {
   return (
     <div className="stats-bar">
@@ -20,6 +22,12 @@ export function StatsBar({
       >
         <Badge color={conflictCount > 0 ? "red" : "green"} />
         {conflictCount} 个冲突
+      </Typography.Text>
+      <Typography.Text
+        className={warningCount > 0 ? "stats-bar__warning" : undefined}
+      >
+        <Badge color={warningCount > 0 ? "orange" : "green"} />
+        {warningCount} 个警告
       </Typography.Text>
     </div>
   );

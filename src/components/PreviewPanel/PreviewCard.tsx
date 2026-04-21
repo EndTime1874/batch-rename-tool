@@ -1,4 +1,4 @@
-import { Checkbox, Tag, Typography } from "antd";
+import { Checkbox, Tag, Tooltip, Typography } from "antd";
 import { getPreviewFileType } from "../../hooks/useRenamePreview";
 import type { PreviewItem } from "../../types";
 
@@ -18,14 +18,17 @@ const FILE_TYPE_META = {
 export function PreviewCard({ item, onToggle }: PreviewCardProps) {
   const fileType = getPreviewFileType(item);
   const meta = FILE_TYPE_META[fileType];
+  const locked = item.conflict || Boolean(item.warning);
 
   return (
     <article
-      className={`preview-card${item.conflict ? " preview-card--conflict" : ""}`}
+      className={`preview-card${item.conflict ? " preview-card--conflict" : ""}${
+        item.warning ? " preview-card--warning" : ""
+      }`}
     >
       <Checkbox
         checked={item.selected}
-        disabled={item.conflict}
+        disabled={locked}
         onChange={onToggle}
       />
       <Tag className="preview-card__type" color={meta.color}>
@@ -39,11 +42,20 @@ export function PreviewCard({ item, onToggle }: PreviewCardProps) {
       <Typography.Text className="preview-card__name" ellipsis strong>
         {item.new_name}
       </Typography.Text>
-      {item.conflict ? (
-        <Tag className="preview-card__conflict" color="orange">
-          ! 冲突
-        </Tag>
-      ) : null}
+      <div className="preview-card__badges">
+        {item.conflict ? (
+          <Tag className="preview-card__conflict" color="orange">
+            ! 冲突
+          </Tag>
+        ) : null}
+        {item.warning ? (
+          <Tooltip title={item.warning}>
+            <Tag className="preview-card__conflict" color="warning">
+              ! 警告
+            </Tag>
+          </Tooltip>
+        ) : null}
+      </div>
     </article>
   );
 }

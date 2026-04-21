@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Checkbox, Input, Space, Typography } from "antd";
-import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
+import { invokeCommand } from "../../utils/tauriInvoke";
 
 interface FolderSelectorProps {
   path: string;
@@ -35,7 +35,11 @@ export function FolderSelector({
     let cancelled = false;
 
     const timer = window.setTimeout(() => {
-      invoke("validate_folder", { path: trimmedPath })
+      invokeCommand<void>(
+        "validate_folder",
+        { path: trimmedPath },
+        { showError: false },
+      )
         .then(() => {
           if (cancelled) {
             return;

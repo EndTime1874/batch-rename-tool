@@ -11,6 +11,7 @@ export interface PreviewItem {
   original: FileItem;
   new_name: string;
   conflict: boolean;
+  warning: string | null;
   selected: boolean;
 }
 

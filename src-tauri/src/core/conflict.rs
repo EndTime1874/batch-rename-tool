@@ -30,6 +30,7 @@ pub fn detect_conflicts(originals: &[FileItem], new_names: &[String]) -> Vec<Pre
                 original: file.clone(),
                 new_name: new_name.clone(),
                 conflict: duplicate || disk_conflict,
+                warning: None,
                 selected: true,
             }
         })
@@ -51,6 +52,7 @@ pub fn resolve_conflicts(items: &mut Vec<PreviewItem>) {
         used_names.insert(normalize_key(&candidate));
         item.new_name = candidate;
         item.conflict = false;
+        item.warning = None;
     }
 }
 

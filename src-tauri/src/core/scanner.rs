@@ -22,6 +22,7 @@ pub async fn scan_folder(
         return Err(format!("路径不是文件夹：{path}"));
     }
 
+    let root_path = root.clone();
     let extension_set = normalize_extensions(extensions);
     let mut files = Vec::new();
     let mut pending_dirs = vec![root];
@@ -29,6 +30,9 @@ pub async fn scan_folder(
     while let Some(dir) = pending_dirs.pop() {
         let mut entries = match fs::read_dir(&dir).await {
             Ok(entries) => entries,
+            Err(err) if dir == root_path => {
+                return Err(format!("无法读取文件夹：{}，{}", dir.display(), err));
+            }
             Err(_) => continue,
         };
 
@@ -50,7 +54,10 @@ pub async fn scan_folder(
                 continue;
             }
 
-            if !metadata.is_file() || !extension_allowed(&path, &extension_set) {
+            if !metadata.is_file()
+                || is_ignored_system_file(&path)
+                || !extension_allowed(&path, &extension_set)
+            {
                 continue;
             }
 
@@ -67,6 +74,13 @@ pub async fn scan_folder(
 
     files.sort_by(|left, right| left.path.cmp(&right.path));
     Ok(files)
+}
+
+fn is_ignored_system_file(path: &Path) -> bool {
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .map(|name| name == ".DS_Store")
+        .unwrap_or(false)
 }
 
 fn normalize_extensions(extensions: &[String]) -> HashSet<String> {
@@ -182,5 +196,20 @@ mod tests {
         let result = scan_folder("/path/that/does/not/exist", false, &[]).await;
         assert!(result.is_err());
         assert!(result.err().unwrap_or_default().contains("路径不存在"));
+    }
+
+    #[tokio::test]
+    async fn scanner_ignores_macos_ds_store() -> Result<(), Box<dyn Error>> {
+        let dir = temp_dir("ds_store")?;
+        fs::write(dir.join(".DS_Store"), "metadata")?;
+        fs::write(dir.join("a.txt"), "a")?;
+
+        let files = scan_folder(dir.to_str().ok_or("invalid temp path")?, false, &[]).await?;
+
+        assert_eq!(files.len(), 1);
+        assert_eq!(files[0].name, "a");
+
+        fs::remove_dir_all(dir)?;
+        Ok(())
     }
 }

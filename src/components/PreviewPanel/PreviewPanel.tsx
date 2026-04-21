@@ -14,6 +14,7 @@ interface PreviewPanelProps {
   selectedItems: PreviewItem[];
   selectedCount: number;
   totalCount: number;
+  warningCount: number;
   onFilterByType: (type: PreviewFileType) => void;
   onInvertSelect: () => void;
   onToggleSelect: (index: number) => void;
@@ -28,6 +29,7 @@ export function PreviewPanel({
   selectedItems,
   selectedCount,
   totalCount,
+  warningCount,
   onFilterByType,
   onInvertSelect,
   onToggleSelect,
@@ -72,6 +74,7 @@ export function PreviewPanel({
               conflictCount={conflictCount}
               selectedCount={selectedCount}
               totalCount={totalCount}
+              warningCount={warningCount}
             />
             <PreviewList
               filterType={filterType}

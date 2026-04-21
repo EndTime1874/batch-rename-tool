@@ -5,7 +5,7 @@ pub mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
@@ -18,7 +18,9 @@ pub fn run() {
             commands::template_cmd::list_templates,
             commands::template_cmd::load_template,
             commands::template_cmd::delete_template,
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        ]);
+
+    if let Err(err) = builder.run(tauri::generate_context!()) {
+        eprintln!("error while running tauri application: {err}");
+    }
 }

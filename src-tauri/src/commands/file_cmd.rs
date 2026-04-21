@@ -30,5 +30,7 @@ pub fn validate_folder(path: String) -> Result<(), String> {
         return Err(format!("路径不是文件夹：{trimmed}"));
     }
 
+    std::fs::read_dir(&folder).map_err(|err| format!("无法读取文件夹：{trimmed}，{err}"))?;
+
     Ok(())
 }

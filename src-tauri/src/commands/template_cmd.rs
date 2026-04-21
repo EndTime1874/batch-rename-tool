@@ -113,7 +113,10 @@ mod tests {
     #[test]
     fn template_store_round_trips_rules() -> Result<(), Box<dyn Error>> {
         let path = temp_file("round_trip")?;
-        let parent = path.parent().expect("temp file has parent").to_path_buf();
+        let parent = path
+            .parent()
+            .ok_or("temp file missing parent")?
+            .to_path_buf();
         let templates = vec![Template {
             name: String::from("常用"),
             rules: vec![RuleConfig::Prefix {

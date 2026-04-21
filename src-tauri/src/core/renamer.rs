@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 
 use chrono::Utc;
 
+use crate::core::validation;
 use crate::models::{ExecuteResult, FailureItem, LogEntry, PreviewItem, UndoResult};
 
 pub fn execute_renames(items: &[PreviewItem]) -> ExecuteResult {
@@ -14,7 +15,6 @@ pub fn execute_renames(items: &[PreviewItem]) -> ExecuteResult {
         failures: Vec::new(),
         entries: Vec::new(),
     };
-    let mut completed: Vec<(PathBuf, PathBuf)> = Vec::new();
 
     for item in items.iter().filter(|item| item.selected) {
         let old_path = PathBuf::from(&item.original.path);
@@ -28,8 +28,12 @@ pub fn execute_renames(items: &[PreviewItem]) -> ExecuteResult {
                 &new_path,
                 "存在文件名冲突",
             );
-            rollback_completed(&mut result, &timestamp, &completed);
-            return result;
+            continue;
+        }
+
+        if let Some(error) = validation::execution_error(item) {
+            record_failure(&mut result, &timestamp, &old_path, &new_path, &error);
+            continue;
         }
 
         if same_path(&old_path, &new_path) {
@@ -40,11 +44,13 @@ pub fn execute_renames(items: &[PreviewItem]) -> ExecuteResult {
                 new_path: new_path.to_string_lossy().to_string(),
                 status: String::from("success"),
             });
-            completed.push((old_path, new_path));
             continue;
         }
 
-        match fs::rename(&old_path, &new_path) {
+        match fs::rename(
+            validation::path_for_rename(&old_path),
+            validation::path_for_rename(&new_path),
+        ) {
             Ok(_) => {
                 result.success += 1;
                 result.entries.push(LogEntry {
@@ -53,7 +59,6 @@ pub fn execute_renames(items: &[PreviewItem]) -> ExecuteResult {
                     new_path: new_path.to_string_lossy().to_string(),
                     status: String::from("success"),
                 });
-                completed.push((old_path, new_path));
             }
             Err(err) => {
                 record_failure(
@@ -63,8 +68,7 @@ pub fn execute_renames(items: &[PreviewItem]) -> ExecuteResult {
                     &new_path,
                     &format!("重命名失败：{err}"),
                 );
-                rollback_completed(&mut result, &timestamp, &completed);
-                return result;
+                continue;
             }
         }
     }
@@ -91,7 +95,10 @@ pub fn undo_renames(log_entries: &[LogEntry]) -> UndoResult {
             continue;
         }
 
-        match fs::rename(&new_path, &old_path) {
+        match fs::rename(
+            validation::path_for_rename(&new_path),
+            validation::path_for_rename(&old_path),
+        ) {
             Ok(_) => result.restored += 1,
             Err(_) => result.failed += 1,
         }
@@ -128,50 +135,6 @@ fn record_failure(
     });
 }
 
-fn rollback_completed(
-    result: &mut ExecuteResult,
-    timestamp: &str,
-    completed: &[(PathBuf, PathBuf)],
-) {
-    for (old_path, new_path) in completed.iter().rev() {
-        if same_path(old_path, new_path) {
-            result.rolled_back += 1;
-            result.entries.push(LogEntry {
-                timestamp: timestamp.to_string(),
-                old_path: old_path.to_string_lossy().to_string(),
-                new_path: new_path.to_string_lossy().to_string(),
-                status: String::from("rolled_back"),
-            });
-            continue;
-        }
-
-        match fs::rename(new_path, old_path) {
-            Ok(_) => {
-                result.rolled_back += 1;
-                result.entries.push(LogEntry {
-                    timestamp: timestamp.to_string(),
-                    old_path: old_path.to_string_lossy().to_string(),
-                    new_path: new_path.to_string_lossy().to_string(),
-                    status: String::from("rolled_back"),
-                });
-            }
-            Err(err) => {
-                result.failed += 1;
-                result.failures.push(FailureItem {
-                    path: new_path.to_string_lossy().to_string(),
-                    error: format!("回滚失败：{err}"),
-                });
-                result.entries.push(LogEntry {
-                    timestamp: timestamp.to_string(),
-                    old_path: old_path.to_string_lossy().to_string(),
-                    new_path: new_path.to_string_lossy().to_string(),
-                    status: String::from("failed"),
-                });
-            }
-        }
-    }
-}
-
 fn same_path(left: &Path, right: &Path) -> bool {
     left == right || left.to_string_lossy().to_lowercase() == right.to_string_lossy().to_lowercase()
 }
@@ -206,6 +169,7 @@ mod tests {
             },
             new_name: new_name.to_string(),
             conflict: false,
+            warning: None,
             selected: true,
         }
     }
@@ -227,21 +191,24 @@ mod tests {
     }
 
     #[test]
-    fn renamer_rolls_back_when_later_rename_fails() -> Result<(), Box<dyn Error>> {
-        let dir = temp_dir("rollback")?;
+    fn renamer_records_failures_without_interrupting_remaining_items() -> Result<(), Box<dyn Error>>
+    {
+        let dir = temp_dir("skip_failure")?;
         fs::write(dir.join("a.txt"), "a")?;
+        fs::write(dir.join("b.txt"), "b")?;
 
         let items = vec![
             item(&dir, "a.txt", "renamed.txt"),
             item(&dir, "missing.txt", "missing-renamed.txt"),
+            item(&dir, "b.txt", "b-renamed.txt"),
         ];
         let result = execute_renames(&items);
 
-        assert_eq!(result.success, 1);
+        assert_eq!(result.success, 2);
         assert_eq!(result.failed, 1);
-        assert_eq!(result.rolled_back, 1);
-        assert!(dir.join("a.txt").exists());
-        assert!(!dir.join("renamed.txt").exists());
+        assert_eq!(result.rolled_back, 0);
+        assert!(dir.join("renamed.txt").exists());
+        assert!(dir.join("b-renamed.txt").exists());
 
         fs::remove_dir_all(dir)?;
         Ok(())

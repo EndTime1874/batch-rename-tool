@@ -1,6 +1,6 @@
 use tauri::AppHandle;
 
-use crate::core::{backup, conflict, renamer, rule_engine, scanner};
+use crate::core::{backup, conflict, renamer, rule_engine, scanner, validation};
 use crate::models::{ExecuteResult, PreviewItem, RuleConfig, UndoResult};
 use crate::utils::path_util;
 
@@ -13,8 +13,10 @@ pub async fn preview_rename(
 ) -> Result<Vec<PreviewItem>, String> {
     let files = scanner::scan_folder(&path, recursive, &extensions).await?;
     let new_names = rule_engine::apply_rules(&files, &rules);
+    let mut preview_items = conflict::detect_conflicts(&files, &new_names);
+    validation::apply_preview_warnings(&mut preview_items);
 
-    Ok(conflict::detect_conflicts(&files, &new_names))
+    Ok(preview_items)
 }
 
 #[tauri::command]
